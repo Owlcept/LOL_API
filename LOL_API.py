@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from dotenv import load_dotenv
 load_dotenv()
 base = 'https://na1.api.riotgames.com'
@@ -21,5 +22,10 @@ puid = r['puuid']
 z = requests.get(f'{base_m}{m_id}{puid}/ids', headers = headers)
 z = z.json()
 x = requests.get(f'{base_m}{game}{z[0]}', headers = headers)
-print(x.json())
+x = x.json()
+for x in x['info']['participants']:
+    #print(x['summonerName'])
+    if x['summonerName'] == 'Owlcept':
+        print(json.dumps(x,indent = 4))
+#print(json.dumps(x['info']['participants'][0],indent = 4))
 
