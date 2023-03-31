@@ -1,9 +1,18 @@
 import requests
-import asqlite
+import sqlite3
 import os
 import time
 from dotenv import load_dotenv
 load_dotenv()
+
+with sqlite3.connect('./LOL_API/database.db') as db:
+    cursor = db.cursor()
+    with open('./LOL_API/build.sql','r') as f:
+        cursor.executescript(f.read())
+        db.commit()
+        print("executed script")
+db = sqlite3.connect('./LOL_API/database.db')
+cursor = db.cursor()
 q = {
     440: "Flex 5v5",
     420: "Ranked Solo/Duo",
@@ -34,11 +43,13 @@ for _ in z:
     x = x.json()
     #print(x['info']['gameMode'])
     #print(x['info']['gameType'])
+    matchid = _ 
     print(q.get(x['info']['queueId']))
     for _ in x['info']['participants']:
         #print(x['summonerName'])
         if _['summonerName'] == 'TD Pandorum':
             #print(json.dumps(x,indent = 4))
+            name = _['summonerName']
             champ = _['championName']
             deaths = _['deaths']
             kills = _['kills']
@@ -49,6 +60,9 @@ for _ in z:
     print(f'{kills}/{deaths}/{assists} - {champ} - {dmg_champ} - {"Win" if win else "Loss"} {pos}')
     for x in x['info']['participants']:
         if x['summonerName'] != 'TD Pandorum' and x['teamPosition'] == pos:
+            cursor.execute("""INSERT INTO games VALUES (?,?,?,?,?,?,?,?,?)""",
+            (name,champ,pos,x['teamPosition'],kills,deaths,assists,win,matchid))
             print(f'{x["kills"]}/{x["deaths"]}/{x["assists"]} - {x["championName"]} - {x["totalDamageDealtToChampions"]} - {x["teamPosition"]}')
+            db.commit()
 #print(json.dumps(x['info']['participants'][0],indent = 4))
 
